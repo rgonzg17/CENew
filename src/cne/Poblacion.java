@@ -1,5 +1,7 @@
 package cne;
 
+import extras.Extra;
+
 import java.util.ArrayList;
 
 public class Poblacion {
@@ -15,8 +17,8 @@ public class Poblacion {
     TODO
     Colocarlos como atributos de gen
      */
-    private int[] minimos = {1, 5, 2, 25,50, 80};
-    private int[] maximos = {30, 10, 35, 100, 60, 120};
+    private int[] minimos = {1, 5, 2, 25};
+    private int[] maximos = {30, 10, 35, 100};
 
     public Poblacion (){
         for (int i = 0; i< cantidadCromosomas; i++){
@@ -32,7 +34,7 @@ public class Poblacion {
 
         for (int i = 0; i < this.cantidadCromosomas; i++) {
             for (int j = 0; j < this.getCantidadGenesCromosoma(); j++) {
-                this.cromosomas[i].getGenes()[j] = (int) (Math.random() * (maximos[j] + 1 - minimos[j])) + minimos[j];
+                this.cromosomas[i].getGenes()[j] =  Extra.numeroAleatorio(minimos[j], maximos[j]);
             }
         }
         return new Poblacion(this.cromosomas);
@@ -40,7 +42,14 @@ public class Poblacion {
 
 
     public int [] evaluar (){
+
+
         for (int i = 0; i < this.cantidadCromosomas; i++){
+            /*
+            TODO
+            chapuza
+             */
+            this.aptitudes[i] = 0;
             this.aptitudes[i] += this.cromosomas[i].getAptitud();
         }
         return this.aptitudes;
@@ -78,7 +87,7 @@ public class Poblacion {
         this.totalAptitudes = this.calcularTotal();
         for (int i = 0; i < this.cantidadCromosomas; i++){
 
-            random = (int)(Math.random() * (this.totalAptitudes + 1 - 1)) + 1;
+            random =  Extra.numeroAleatorio(1, this.totalAptitudes);
             while (random > rango[j]){
                 if (j < this.cantidadCromosomas)j++;
             }
@@ -117,6 +126,10 @@ public class Poblacion {
         float random = 0f, probabilidadMutacion = 0.15f;
 
         for (int i = 0; i< this.cantidadCromosomas; i++){
+            /*
+            TODO
+            Hacer esto en la clase Extra
+             */
             random = (float)(Math.random() * (1));
             for (int j = 0; j < this.getCantidadGenesCromosoma(); j++){
                 if (random < probabilidadMutacion){
