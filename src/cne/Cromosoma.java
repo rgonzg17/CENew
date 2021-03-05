@@ -17,6 +17,16 @@ public class Cromosoma {
         this.genes = genes;
         getAptitud();
     }
+    /*
+    Constructor de copia
+     */
+    public Cromosoma(Cromosoma otroCromosoma){
+        this.cantidadGenes = otroCromosoma.cantidadGenes;
+        for (int i = 0; i <this.cantidadGenes; i++){
+            this.genes[i] = otroCromosoma.getGenes()[i];
+        }
+        this.aptitud = otroCromosoma.aptitud;
+    }
 
     public int getAptitud(){
 
@@ -43,10 +53,10 @@ public class Cromosoma {
         return this.cantidadGenes;
     }
 
+
     @Override
     public String toString(){
         StringBuffer cadena = new StringBuffer();
-        cadena.append("\n");
         for (int i = 0; i < this.cantidadGenes; i++){
             cadena.append(this.getGenes()[i]+",");
         }

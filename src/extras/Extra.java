@@ -9,4 +9,8 @@ public class Extra {
         return ThreadLocalRandom.current().nextInt(minimo, maximo+1);
     }
 
+    public static float numeroAleatorioFlaot(){
+        return ThreadLocalRandom.current().nextFloat();
+    }
+
 }
