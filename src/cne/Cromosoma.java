@@ -42,4 +42,14 @@ public class Cromosoma {
     public int getCantidadGenes() {
         return this.cantidadGenes;
     }
+
+    @Override
+    public String toString(){
+        StringBuffer cadena = new StringBuffer();
+        cadena.append("\n");
+        for (int i = 0; i < this.cantidadGenes; i++){
+            cadena.append(this.getGenes()[i]+",");
+        }
+        return cadena.toString();
+    }
 }

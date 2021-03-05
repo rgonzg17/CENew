@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 public class Poblacion {
 
-    private int cantidadCromosomas = 20;
-    private int maximoGeneraciones = 10;
+    private int cantidadCromosomas = 6;
+    private int maximoGeneraciones = 1;
     private Cromosoma[] cromosomas = new Cromosoma [this.cantidadCromosomas];
     private int aptitudes [] = new int[cantidadCromosomas];
     private ArrayList aptitudesGeneracion = new ArrayList();
@@ -66,7 +66,8 @@ public class Poblacion {
     public Poblacion seleccionar(){
 
         int[] rango = new int[this.cantidadCromosomas];
-        int random = 0, j = 0, contador = 0;
+        int random = 0, elegido = 0, contador = 0;
+        Cromosoma[] nuevosCromosomas = new Cromosoma[this.cantidadCromosomas];
 
         /*
         Calculamos el rango de aptitudes (la rueda de selección). Aquellos que tengan más aptitud, tendrán más espectro
@@ -83,28 +84,49 @@ public class Poblacion {
         Generamos un número aleatorio, y según donde caiga dentro del array de rangos, se añadirá el cromosoma relativo
         a su posición a la lista final de la población
          */
+        System.out.println("RANGO");
+        for (int k = 0; k <this.cantidadCromosomas; k++){
+            System.out.print(rango[k] + ",");
+        }
+        System.out.println();
 
         this.totalAptitudes = this.calcularTotal();
+
         for (int i = 0; i < this.cantidadCromosomas; i++){
 
             random =  Extra.numeroAleatorio(1, this.totalAptitudes);
-            while (random > rango[j]){
-                if (j < this.cantidadCromosomas)j++;
+            elegido = 0;
+
+            while (random > rango[elegido]){
+                if (elegido < this.cantidadCromosomas)
+                    elegido++;
             }
 
             /*
             TODO
             Arreglar chapuza esta
             */
+            /*
             int[] nuevosGenes = new int[this.getCantidadGenesCromosoma()];
             for (int k = 0; k < this.getCantidadGenesCromosoma(); k++){
-                nuevosGenes[k] = cromosomas[j].getGenes()[k];
+                nuevosGenes[k] = cromosomas[elegido].getGenes()[k];
             }
             Cromosoma nuevoCromosoma = new Cromosoma(nuevosGenes);
-           this.cromosomas[i] = nuevoCromosoma;
-            j = 0;
+
+             */
+            System.out.println("RANDOM");
+            System.out.println(random+" y el cromosoma escogido es : "+elegido);
+            System.out.println(cromosomas[elegido].toString());
+           // this.cromosomas[i] = nuevoCromosoma;
+
+
+            System.arraycopy(this.cromosomas, elegido, nuevosCromosomas, i, 1);
+
+
+
         }
-        return new Poblacion(this.cromosomas);
+        System.out.println("ANTES DE SALIR\n"+this.toString());
+        return new Poblacion(nuevosCromosomas);
     }
 
     public Poblacion cruzar(){
@@ -123,18 +145,18 @@ public class Poblacion {
 
     public Poblacion mutar (){
 
-        float random = 0f, probabilidadMutacion = 0.15f;
+        float randomMutacion = 0f, probabilidadMutacion = 0.3f;
+        int randomGen = 0;
 
         for (int i = 0; i< this.cantidadCromosomas; i++){
             /*
             TODO
             Hacer esto en la clase Extra
              */
-            random = (float)(Math.random() * (1));
-            for (int j = 0; j < this.getCantidadGenesCromosoma(); j++){
-                if (random < probabilidadMutacion){
-                    this.cromosomas[i].getGenes()[j] = (int) (Math.random() * (maximos[j] + 1 - minimos[j])) + minimos[j];
-                }
+            randomMutacion = (float)(Math.random() * (1));
+            randomGen = Extra.numeroAleatorio(0, this.getCantidadGenesCromosoma()-1);
+            if (randomMutacion < probabilidadMutacion){
+                this.cromosomas[i].getGenes()[randomGen] = Extra.numeroAleatorio(minimos[randomGen], maximos[randomGen]);
             }
         }
         return new Poblacion(this.cromosomas);
@@ -165,12 +187,21 @@ public class Poblacion {
         this.crearPoblacion();
         System.out.println(this.toString());
 
-        System.out.println("\n--------------------------------APTITUDES");
+
+        //System.out.println("\n--------------------------------APTITUDES");
         this.evaluar();
-        System.out.println(this.aptitudesToString());
+        //System.out.println(this.aptitudesToString());
+
 
         System.out.println("\n--------------------------------TOTAL");
         System.out.println(this.calcularTotal());
+
+        System.out.println("------------------------MEJOR CROMOSOMA:");
+        for (int i = 0; i < this.getCantidadGenesCromosoma(); i++){
+            System.out.print(this.mejorCromosoma().getGenes()[i]+",");
+        }
+        System.out.println("Aptitud: "+this.mejorCromosoma().getAptitud());
+
 
 
 
@@ -188,9 +219,11 @@ public class Poblacion {
             this.mutar();
             System.out.println(this.toString());
 
-            System.out.println("\n--------------------------------APTITUDES Generacion: "+generacion);
+
+            //System.out.println("\n--------------------------------APTITUDES Generacion: "+generacion);
             this.evaluar();
-            System.out.println(aptitudesToString());
+            //System.out.println(aptitudesToString());
+
 
             System.out.println("\n--------------------------------TOTAL Generacion: "+generacion);
             System.out.println(this.calcularTotal());
@@ -203,6 +236,8 @@ public class Poblacion {
         for (int i = 0; i < this.getCantidadGenesCromosoma(); i++){
             System.out.print(this.mejorCromosoma().getGenes()[i]+",");
         }
+        System.out.println("Aptitud: "+this.mejorCromosoma().getAptitud());
+
 
         new Ventana(this);
         return mejorCromosoma();
@@ -274,6 +309,7 @@ public class Poblacion {
             for (int j = 0; j < this.getCantidadGenesCromosoma(); j++) {
                 cadena.append(cromosomas[i].getGenes()[j] + ",");
             }
+            cadena.append("\n Aptitud: "+cromosomas[i].getAptitud());
         }
         return cadena.toString();
     }
