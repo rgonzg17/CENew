@@ -1,5 +1,6 @@
 package cne;
 
+import excepciones.AlgoritmoGeneticoExcepcion;
 import extras.Extra;
 
 import java.util.ArrayList;
@@ -11,12 +12,25 @@ public class Poblacion {
     private Cromosoma[] cromosomas = new Cromosoma [this.cantidadCromosomas];
     private ArrayList aptitudesGeneracion = new ArrayList();
     private int totalAptitudes;
-    //private int intervaloGrafica;
 
     /*
-    TODO
-    Colocarlos como atributos de gen
+    Variable que indica desde donde cortar en el cromosoma, por defecto se inicia en 2
      */
+    private int puntoDeCorte = 2;
+
+    /*
+    Si está en false, se mostrarán todas las generaciones en el gráfico.
+    Si está en true, se mostrarán las generaciones de 10 en 10 en el gráfico
+     */
+    private boolean intervaloGrafica = false;
+
+    /*
+    Elegir cada cuantos números hacer un intervalo.
+    Solo estará habilitado cuando intervaloGrafica esté en true
+    Por defecto está en 10
+     */
+    private int numeroIntervalo = 10;
+
     private int[] minimos = {1, 5, 2, 25, 15, 60, 8, 9};
     private int[] maximos = {30, 10, 35, 100, 55, 200, 40, 50};
 
@@ -114,12 +128,17 @@ public class Poblacion {
         return new Poblacion(this.cromosomas);
     }
 
-    public Poblacion cruzar(){
+    public Poblacion cruzar() throws AlgoritmoGeneticoExcepcion {
 
         int mezclaAux = 0;
+            if (this.puntoDeCorte >= this.getCantidadGenesCromosoma()){
+                throw new AlgoritmoGeneticoExcepcion("El punto de corte no puede ser mayor que el número de genes" +
+                        "del cromosoma");
+            }
+
 
         for (int i = 0; i < this.cantidadCromosomas ; i+=2){
-            for (int j = 2; j < this.getCantidadGenesCromosoma(); j++){
+            for (int j = this.puntoDeCorte; j < this.getCantidadGenesCromosoma(); j++){
                 mezclaAux = this.cromosomas[i].getGenes()[j];
                 this.cromosomas[i].getGenes()[j] = this.cromosomas[i+1].getGenes()[j];
                 this.cromosomas[i+1].getGenes()[j] = mezclaAux;
@@ -147,7 +166,7 @@ public class Poblacion {
         return new Poblacion(this.cromosomas);
     }
 
-    public Cromosoma algoritmoGeneticoBase(){
+    public Cromosoma algoritmoGeneticoBase() throws AlgoritmoGeneticoExcepcion {
 
         int generacion = 1;
         this.crearPoblacion();
@@ -164,7 +183,7 @@ public class Poblacion {
         return mejorCromosoma();
     }
 
-    public Cromosoma algoritmoGeneticoBaseString(){
+    public Cromosoma algoritmoGeneticoBaseString() throws AlgoritmoGeneticoExcepcion {
 
         int generacion = 1;
 
@@ -192,8 +211,8 @@ public class Poblacion {
             this.seleccionar();
             System.out.println(this.toString());
 
-        System.out.println("\n--------------------------------TOTAL TRAS SELECCIONAR");
-        System.out.println(this.calcularTotal());
+            System.out.println("\n--------------------------------TOTAL TRAS SELECCIONAR");
+            System.out.println(this.calcularTotal());
 
             System.out.println("\n--------------------------------CRUZAR Generacion: "+generacion);
             this.cruzar();
@@ -212,8 +231,10 @@ public class Poblacion {
             System.out.println("\n--------------------------------TOTAL FINAL Generacion: "+generacion);
             System.out.println(this.calcularTotal());
 
-            //if (generacion%10 == 0)
-            this.aptitudesGeneracion.add(totalAptitudes);
+            if (this.intervaloGrafica == true) {
+                if (generacion % this.numeroIntervalo == 0)
+                    this.aptitudesGeneracion.add(totalAptitudes);
+            }else this.aptitudesGeneracion.add(totalAptitudes);
             generacion++;
         }while (generacion < this.maximoGeneraciones);
 
@@ -224,7 +245,6 @@ public class Poblacion {
         }
         System.out.println("Aptitud: "+this.mejorCromosoma().getAptitud());
 
-        //intervaloGrafica = aptitudesGeneracion.size();
         new Ventana(this);
         return mejorCromosoma();
     }
@@ -276,10 +296,7 @@ public class Poblacion {
     public ArrayList getAptitudesGeneracion() {
         return aptitudesGeneracion;
     }
-   /* public int getIntervaloGrafica() {
-        return intervaloGrafica;
-    }
-    */
+
 
     public String aptitudesToString(){
 
