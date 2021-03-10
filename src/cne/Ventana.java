@@ -4,27 +4,42 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.category.DefaultCategoryDataset;
+
 import javax.swing.*;
+import java.awt.*;
+import java.util.ArrayList;
 
 public class Ventana extends JFrame {
-    JPanel panel;
 
-    public Ventana(Poblacion poblacion) {
-        init(poblacion);
+    /**
+     * Constructor de Ventana
+     * Si tipoGrafica es 0, se creará la ventana de las aptitudes de la población
+     * Si tipoGrafica es 1, se creará la ventana de las aptitudes del mejor cromosoma
+     * @param aptitudes
+     * @param tipoGrafica
+     */
+    public Ventana(ArrayList aptitudes, int tipoGrafica) {
+        if (tipoGrafica == 0)
+            initAptitudesPoblacion(aptitudes);
+        else if(tipoGrafica == 1)
+            initAptitudesMejorCromosoma(aptitudes);
     }
 
-    private void init(Poblacion poblacion){
+
+    private void initAptitudesPoblacion(ArrayList aptitudesPoblacion) {
         DefaultCategoryDataset line_chart_dataset = new DefaultCategoryDataset();
-        for (int i = 0; i < poblacion.getAptitudesGeneracion().size(); i++) {
-            line_chart_dataset.addValue((int) poblacion.getAptitudesGeneracion().get(i), "aptitud", ""+i);
+        for (int i = 0; i < aptitudesPoblacion.size(); i++) {
+            line_chart_dataset.addValue((int) aptitudesPoblacion.get(i), "aptitud", "" + i);
         }
         JFreeChart chart = ChartFactory.createLineChart("Evolucion aptitudes",
-                "Generacion", "Aptitudes", line_chart_dataset, PlotOrientation.VERTICAL,
+                "Generacion", "Aptitud", line_chart_dataset, PlotOrientation.VERTICAL,
                 true, true, false);
 
+
         ChartPanel panel = new ChartPanel(chart);
-        JFrame ventana = new JFrame("Algoritmo Genético");
+        JFrame ventana = new JFrame("Aptitudes de la Población");
         ventana.getContentPane().add(panel);
         ventana.pack();
         ventana.setVisible(true);
@@ -34,7 +49,24 @@ public class Ventana extends JFrame {
 
     }
 
-    public DefaultCategoryDataset valoresGrafica(DefaultCategoryDataset valores) {
-        return valores;
+    private void initAptitudesMejorCromosoma(ArrayList aptitudesCromosoma){
+        DefaultCategoryDataset line_chart_dataset = new DefaultCategoryDataset();
+        for (int i = 0; i < aptitudesCromosoma.size(); i++) {
+            line_chart_dataset.addValue((int) aptitudesCromosoma.get(i), "aptitud", "" + i);
+        }
+        JFreeChart chart = ChartFactory.createLineChart("Evolucion aptitudes",
+                "Generacion", "Aptitud", line_chart_dataset, PlotOrientation.VERTICAL,
+                true, true, false);
+
+
+        ChartPanel panel = new ChartPanel(chart);
+        JFrame ventana = new JFrame("Mejor Cromosoma");
+        ventana.getContentPane().add(panel);
+        ventana.pack();
+        ventana.setVisible(true);
+        ventana.setSize(400, 300);
+        ventana.setLocationRelativeTo(getRootPane());
+        ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
+
 }
