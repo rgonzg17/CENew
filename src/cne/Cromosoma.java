@@ -2,10 +2,21 @@ package cne;
 
 public class Cromosoma {
 
+
+    //VALORES QUE SE PUEDEN CAMBIAR
+    /**
+     * Cantidad de genes que tiene cada cromosoma
+     */
     private int cantidadGenes = 4;
+
+    //VARIABLES QUE NO SE PUEDEN MODIFICAR
     private int [] genes = new int[cantidadGenes];
     private int aptitud;
 
+
+    /**
+     * Constructor
+     */
     public Cromosoma(){
         for (int i = 0; i < cantidadGenes ; i++){
             genes[i] = 0;
@@ -13,12 +24,9 @@ public class Cromosoma {
         aptitud = 0;
     }
 
-    public Cromosoma(int[]genes){
-        this.genes = genes;
-        getAptitud();
-    }
-    /*
-    Constructor de copia
+    /**
+     * Constructor de copia
+     * @param otroCromosoma
      */
     public Cromosoma(Cromosoma otroCromosoma){
         this.cantidadGenes = otroCromosoma.cantidadGenes;
@@ -27,44 +35,46 @@ public class Cromosoma {
         }
         this.aptitud = otroCromosoma.aptitud;
     }
-    /*
-    public int getAptitud(){
 
-        this.aptitud = 0;
-        for (int i = 0; i < this.cantidadGenes; i++){
-            this.aptitud += this.getGenes()[i];
-        }
-        return this.aptitud;
-    }
+    /**
+     * Getter de la aptitud del cromosoma
+     * @return aptitud del cromosoma
      */
-
     public int getAptitud(){
 
         return this.aptitud;
     }
 
-    //NUEVO
+    /**
+     * Setter de la aptitud del cromosoma
+     * @param aptitud
+     */
     public void setAptitud(int aptitud){
         this.aptitud = aptitud;
     }
 
-    public void setGenes(int[] genes) {
-        this.genes = genes;
-    }
 
+    /**
+     * Getter de los genes que tiene un cromosoma
+     * @return
+     */
     public int[] getGenes() {
         return this.genes;
     }
 
-    public void setCantidadGenes(int cantidadGenes) {
-        this.cantidadGenes = cantidadGenes;
-    }
-
+    /**
+     * Getter de la cantidad de genes que tiene un cromosoma
+     * @return cantidad de genes que tiene un cromosoma
+     */
     public int getCantidadGenes() {
         return this.cantidadGenes;
     }
 
 
+    /**
+     * Método toString para devolver por pantalla los valores de los genes de cada cromosoma
+     * @return Salida por pantalla de la representación de un cromosoma
+     */
     @Override
     public String toString(){
         StringBuffer cadena = new StringBuffer();
