@@ -27,7 +27,7 @@ public class Cromosoma {
         }
         this.aptitud = otroCromosoma.aptitud;
     }
-
+    /*
     public int getAptitud(){
 
         this.aptitud = 0;
@@ -35,6 +35,17 @@ public class Cromosoma {
             this.aptitud += this.getGenes()[i];
         }
         return this.aptitud;
+    }
+     */
+
+    public int getAptitud(){
+
+        return this.aptitud;
+    }
+
+    //NUEVO
+    public void setAptitud(int aptitud){
+        this.aptitud = aptitud;
     }
 
     public void setGenes(int[] genes) {

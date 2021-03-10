@@ -28,7 +28,7 @@ public class Poblacion {
     /**
      * Probabilidad de que un cromosoma mute.
      */
-    private float probabilidadMutacion = 0.01f;
+    private float probabilidadMutacion = 0.015f;
 
     /**
     Si está en false, se mostrarán todas las generaciones en el gráfico.
@@ -96,18 +96,28 @@ public class Poblacion {
      * Método para evaluar los cromosomas. Se suma los valores de los genes para calcular su aptitud
      * @return Una lista de aptitudes de los cromosomas
      */
+    /*
     public int [] evaluar (){
 
         int [] aptitudes = new int[this.cantidadCromosomas];
         for (int i = 0; i < this.cantidadCromosomas; i++){
-            /*
-            TODO
-            chapuza
-             */
             aptitudes[i] = 0;
             aptitudes[i] += this.cromosomas[i].getAptitud();
         }
         return aptitudes;
+    }
+     */
+    public void evaluar (){
+
+        int aptitud = 0;
+        for (int i = 0; i < this.cantidadCromosomas; i++){
+            for (int j = 0; j < this.getCantidadGenesCromosoma(); j++){
+                aptitud += this.cromosomas[i].getGenes()[j];
+            }
+            this.cromosomas[i].setAptitud(aptitud);
+            aptitud=0;
+        }
+
     }
 
     /**
