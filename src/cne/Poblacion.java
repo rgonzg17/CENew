@@ -7,43 +7,80 @@ import java.util.ArrayList;
 
 public class Poblacion {
 
-    private int cantidadCromosomas = 20;
-    private int maximoGeneraciones = 100;
-    private Cromosoma[] cromosomas = new Cromosoma [this.cantidadCromosomas];
-    private ArrayList aptitudesGeneracion = new ArrayList();
-    private int totalAptitudes;
 
-    /*
-    Variable que indica desde donde cortar en el cromosoma, por defecto se inicia en 2
+    //VALORES QUE SE PUEDEN CAMBIAR
+    /**
+     * Cantidad de cromosomas dentro de la población
+     */
+    private int cantidadCromosomas = 20;
+
+    /**
+     * Cantidad de generaciones que se van a repetir
+     */
+    private int maximoGeneraciones = 100;
+
+    /**
+     * Variable que indica desde donde cortar en el cromosoma, por defecto se inicia en 2
      */
     private int puntoDeCorte = 2;
 
-    /*
+
+    /**
+     * Probabilidad de que un cromosoma mute.
+     */
+    private float probabilidadMutacion = 0.01f;
+
+    /**
     Si está en false, se mostrarán todas las generaciones en el gráfico.
     Si está en true, se mostrarán las generaciones de 10 en 10 en el gráfico
      */
     private boolean intervaloGrafica = false;
 
-    /*
+    /**
     Elegir cada cuantos números hacer un intervalo.
     Solo estará habilitado cuando intervaloGrafica esté en true
     Por defecto está en 10
      */
     private int numeroIntervalo = 10;
 
+    /**
+     * Mínimos que deben ser (según su par) menores que los máximos
+     */
     private int[] minimos = {1, 5, 2, 25, 15, 60, 8, 9};
+
+    /**
+     * Máximos que deben ser (según su par) mayores que los mínimos
+     */
     private int[] maximos = {30, 10, 35, 100, 55, 200, 40, 50};
 
+
+    //VARIABLES QUE NO SE PUEDEN MODIFICAR
+    private Cromosoma[] cromosomas = new Cromosoma [this.cantidadCromosomas];
+    private ArrayList aptitudesGeneracion = new ArrayList();
+    private int totalAptitudes;
+
+    /**
+     * Constructor de cero
+     */
     public Poblacion (){
         for (int i = 0; i< cantidadCromosomas; i++){
             cromosomas[i] = new Cromosoma();
         }
     }
 
+    /**
+     * Constructor con cromosomas creados
+     * @param cromosomas
+     */
     public Poblacion (Cromosoma cromosomas []){
         this.cromosomas = cromosomas;
     }
 
+
+    /**
+     * Método para crear poblacion con números aleatorios
+     * @return Una población con todos los cromosomas creados de manera aleatoria
+     */
     public Poblacion crearPoblacion() {
 
         for (int i = 0; i < this.cantidadCromosomas; i++) {
@@ -55,6 +92,10 @@ public class Poblacion {
     }
 
 
+    /**
+     * Método para evaluar los cromosomas. Se suma los valores de los genes para calcular su aptitud
+     * @return Una lista de aptitudes de los cromosomas
+     */
     public int [] evaluar (){
 
         int [] aptitudes = new int[this.cantidadCromosomas];
@@ -69,6 +110,10 @@ public class Poblacion {
         return aptitudes;
     }
 
+    /**
+     * Método para calcular el total de la aptitud de toda la población
+     * @return La aptitud total de toda la población
+     */
     public int calcularTotal(){
         this.totalAptitudes = 0;
         for (int i = 0; i < this.cantidadCromosomas; i++){
@@ -77,6 +122,10 @@ public class Poblacion {
         return this.totalAptitudes;
     }
 
+    /**
+     * Método para crear una nueva población, siguiendo la selección por ruleta de probabilidades
+     * @return Una nueva población con cromosomas seleccionados según la ruleta de probabilidades
+     */
     public Poblacion seleccionar(){
 
         int[] rango = new int[this.cantidadCromosomas];
@@ -128,6 +177,11 @@ public class Poblacion {
         return new Poblacion(this.cromosomas);
     }
 
+    /**
+     * Método para cruzar valores de los genes entre los cromosomas de la población de 2 en 2
+     * @return Una nueva población en la que los cromosomas tienen valores intercambiados-
+     * @throws AlgoritmoGeneticoExcepcion
+     */
     public Poblacion cruzar() throws AlgoritmoGeneticoExcepcion {
 
         int mezclaAux = 0;
@@ -147,9 +201,13 @@ public class Poblacion {
         return new Poblacion(this.cromosomas);
     }
 
+    /**
+     * Método para mutar determinados cromosomas de la población según la probabilidad de mutación
+     * @return Una nueva población, con cromosomas que han cambiado el valor de alguno de sus genes
+     */
     public Poblacion mutar (){
 
-        float randomMutacion = 0f, probabilidadMutacion = 0.01f;
+        float randomMutacion = 0f;
         int randomGen = 0;
 
         for (int i = 0; i< this.cantidadCromosomas; i++){
@@ -159,13 +217,18 @@ public class Poblacion {
              */
             randomMutacion = Extra.numeroAleatorioFlaot();
             randomGen = Extra.numeroAleatorio(0, this.getCantidadGenesCromosoma()-1);
-            if (randomMutacion < probabilidadMutacion){
+            if (randomMutacion < this.probabilidadMutacion){
                 this.cromosomas[i].getGenes()[randomGen] = Extra.numeroAleatorio(minimos[randomGen], maximos[randomGen]);
             }
         }
         return new Poblacion(this.cromosomas);
     }
 
+    /**
+     * Método que calcula toda la secuencia del algoritmo genético, pero sin salidas por pantalla
+     * @return Mejor cromosoma al final de la ejecución
+     * @throws AlgoritmoGeneticoExcepcion
+     */
     public Cromosoma algoritmoGeneticoBase() throws AlgoritmoGeneticoExcepcion {
 
         int generacion = 1;
@@ -183,6 +246,11 @@ public class Poblacion {
         return mejorCromosoma();
     }
 
+    /**
+     * Método que calcula toda la secuencia del algoritmo genético, con salidas por pantalla
+     * @return Mejor cromosoma al final de la ejecución
+     * @throws AlgoritmoGeneticoExcepcion
+     */
     public Cromosoma algoritmoGeneticoBaseString() throws AlgoritmoGeneticoExcepcion {
 
         int generacion = 1;
@@ -195,6 +263,7 @@ public class Poblacion {
             //System.out.println("\n--------------------------------APTITUDES");
             this.evaluar();
             //System.out.println(this.aptitudesToString());
+        System.out.println(aptitudesToString());
 
 
             System.out.println("\n--------------------------------TOTAL TRAS EVALUAR");
@@ -249,6 +318,11 @@ public class Poblacion {
         return mejorCromosoma();
     }
 
+
+    /**
+     * Método que calcula el mejor cromosoma de la población
+     * @return El mejor cromosoma de la población
+     */
     public Cromosoma mejorCromosoma (){
 
         int maximo = Integer.MIN_VALUE, indice = 0;
@@ -261,37 +335,22 @@ public class Poblacion {
         return cromosomas[indice];
     }
 
-    public Cromosoma[] getCromosomas() {
-        return cromosomas;
-    }
-
-    public void setCantidadCromosomas(int cantidadCromosomas) {
-        this.cantidadCromosomas = cantidadCromosomas;
-    }
-
+    /**
+     * Getter de la cantidad de cromosomas que tiene la población
+     * @return Cantidad de cromosomas que tiene la aplicación
+     */
     public int getCantidadCromosomas() {
         return this.cantidadCromosomas;
     }
 
+    /**
+     * Getter de la cantidad de genes que tienen los cromosomas de la población
+     * @return Cantidad de genes que tiene cada cromosoma de la población
+     */
     public int getCantidadGenesCromosoma(){
         return new Cromosoma().getCantidadGenes();
     }
 
-    public void setMaximos(int[] maximos) {
-        this.maximos = maximos;
-    }
-
-    public void setMinimos(int[] minimos) {
-        this.minimos = minimos;
-    }
-
-    public int getTotalAptitudes() {
-        return totalAptitudes;
-    }
-
-    public int getMaximoGeneraciones() {
-        return maximoGeneraciones;
-    }
 
     public ArrayList getAptitudesGeneracion() {
         return aptitudesGeneracion;
