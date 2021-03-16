@@ -28,7 +28,12 @@ public class Ventana extends JFrame {
     }
 
 
+    /**
+     * Método para iniciar la gráfica de las aptitudes totales de cada generación del algoritmo
+     * @param aptitudesPoblacion
+     */
     private void initAptitudesPoblacion(ArrayList aptitudesPoblacion) {
+
         DefaultCategoryDataset line_chart_dataset = new DefaultCategoryDataset();
         for (int i = 0; i < aptitudesPoblacion.size(); i++) {
             line_chart_dataset.addValue((int) aptitudesPoblacion.get(i), "aptitud", "" + i);
@@ -49,7 +54,12 @@ public class Ventana extends JFrame {
 
     }
 
+    /**
+     * Método para iniciar la gráfica de las aptitudes del mejor cromosoma en cada generación
+     * @param aptitudesCromosoma
+     */
     private void initAptitudesMejorCromosoma(ArrayList aptitudesCromosoma){
+
         DefaultCategoryDataset line_chart_dataset = new DefaultCategoryDataset();
         for (int i = 0; i < aptitudesCromosoma.size(); i++) {
             line_chart_dataset.addValue((int) aptitudesCromosoma.get(i), "aptitud", "" + i);

@@ -1,6 +1,6 @@
 package cne;
 
-public class Cromosoma {
+public class Cromosoma implements Comparable<Cromosoma>{
 
 
     //VALORES QUE SE PUEDEN CAMBIAR
@@ -26,6 +26,7 @@ public class Cromosoma {
 
     /**
      * Constructor de copia
+     *
      * @param otroCromosoma
      */
     public Cromosoma(Cromosoma otroCromosoma){
@@ -38,6 +39,7 @@ public class Cromosoma {
 
     /**
      * Getter de la aptitud del cromosoma
+     *
      * @return aptitud del cromosoma
      */
     public int getAptitud(){
@@ -47,6 +49,7 @@ public class Cromosoma {
 
     /**
      * Setter de la aptitud del cromosoma
+     *
      * @param aptitud
      */
     public void setAptitud(int aptitud){
@@ -56,6 +59,7 @@ public class Cromosoma {
 
     /**
      * Getter de los genes que tiene un cromosoma
+     *
      * @return
      */
     public int[] getGenes() {
@@ -64,15 +68,27 @@ public class Cromosoma {
 
     /**
      * Getter de la cantidad de genes que tiene un cromosoma
+     *
      * @return cantidad de genes que tiene un cromosoma
      */
     public int getCantidadGenes() {
         return this.cantidadGenes;
     }
 
+    @Override
+    public int compareTo(Cromosoma cromosoma){
+        if (this.aptitud < cromosoma.aptitud){
+            return 1;
+        }
+        if (this.aptitud > cromosoma.aptitud){
+            return -1;
+        }
+        return 0;
+    }
 
     /**
      * Método toString para devolver por pantalla los valores de los genes de cada cromosoma
+     *
      * @return Salida por pantalla de la representación de un cromosoma
      */
     @Override

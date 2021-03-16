@@ -3,7 +3,9 @@ package cne;
 import excepciones.AlgoritmoGeneticoExcepcion;
 import extras.Extra;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Poblacion {
 
@@ -12,12 +14,18 @@ public class Poblacion {
     /**
      * Cantidad de cromosomas dentro de la población
      */
-    private int cantidadCromosomas = 20;
+    private int cantidadCromosomas = 6;
 
     /**
      * Cantidad de generaciones que se van a repetir
      */
-    private int maximoGeneraciones = 100;
+    private int maximoGeneraciones = 10;
+
+
+    /**
+     * Número de mejores cromosomas que se van a seleccionar, por defecto solo se escogerá al mejor
+     */
+    private int numeroElitismo = 3;
 
     /**
      * Variable que indica desde donde cortar en el cromosoma, por defecto se inicia en 2
@@ -27,11 +35,12 @@ public class Poblacion {
     /**
      * Por defecto, la mutación será por cromosoma, a no ser que se ponga esta variable a true
      */
-    private boolean mutacionPorGenes = false;
+    private boolean mutacionPorGenes = true;
 
     /**
      * Probabilidad de que un gen de un cromosoma mute
      */
+
     private float probabilidadMutacionGen = 0.015f;
     /**
      * Probabilidad de que un cromosoma mute alguno de sus genes.
@@ -69,7 +78,7 @@ public class Poblacion {
     private int totalAptitudes;
 
     /**
-     * Constructor de cero
+     * Constructor
      */
     public Poblacion() {
         for (int i = 0; i < cantidadCromosomas; i++) {
@@ -108,17 +117,6 @@ public class Poblacion {
      *
      * @return Una lista de aptitudes de los cromosomas
      */
-    /*
-    public int [] evaluar (){
-
-        int [] aptitudes = new int[this.cantidadCromosomas];
-        for (int i = 0; i < this.cantidadCromosomas; i++){
-            aptitudes[i] = 0;
-            aptitudes[i] += this.cromosomas[i].getAptitud();
-        }
-        return aptitudes;
-    }
-     */
     public void evaluar() {
 
         int aptitud = 0;
@@ -153,14 +151,13 @@ public class Poblacion {
     public Poblacion seleccionar() {
 
         int[] rango = new int[this.cantidadCromosomas];
-        int random = 0, elegido = 0;
+        int random = 0, randomElitismo = 0, elegido = 0;
         Cromosoma[] nuevosCromosomas = new Cromosoma[this.cantidadCromosomas];
 
         /*
         Calculamos el rango de aptitudes (la rueda de selección). Aquellos que tengan más aptitud, tendrán más espectro
         Y por tanto una posibilidad relativa a su aptitud
         */
-
         rango[0] = this.cromosomas[0].getAptitud();
         for (int i = 1; i < this.cantidadCromosomas; i++) {
             rango[i] = rango[i - 1] + this.cromosomas[i].getAptitud();
@@ -181,12 +178,29 @@ public class Poblacion {
 
         /*
         Elitismo
-        La primer posicion de la nueva población, será el mejor cromosoma de la población hasta el entonces
+        Se añade el numero de mejores cromosomassen una posición aleatoria dentro de la población
          */
-        nuevosCromosomas[0] = new Cromosoma(mejorCromosoma());
-        for (int i = 1; i < this.cantidadCromosomas; i++) {
 
-            random = Extra.numeroAleatorio(1, this.totalAptitudes);
+        /*
+        Creamos una lista auxiliar para ordenar los cromosomas por aptitud, y añadirlos a la nueva lista
+         */
+        Cromosoma [] cromosomasOrdenados = this.copiarCromosomas(this.cromosomas);
+        this.ordenarCromosomas(cromosomasOrdenados);
+        int x = 0;
+        while (x < this.numeroElitismo){
+
+            randomElitismo = Extra.numeroAleatorio(0,this.cantidadCromosomas-1);
+            if(nuevosCromosomas[randomElitismo] == null){
+                nuevosCromosomas[randomElitismo] = new Cromosoma(cromosomasOrdenados[x]);
+                x++;
+            }
+
+        }
+
+        int i = 0;
+        while(i < this.cantidadCromosomas){
+
+            random = Extra.numeroAleatorio(0, this.totalAptitudes);
             elegido = 0;
 
             while (random > rango[elegido]) {
@@ -197,8 +211,17 @@ public class Poblacion {
             System.out.println("RANDOM");
             System.out.println(random + " y el cromosoma escogido es : " + elegido);
             System.out.println(this.cromosomas[elegido]);
-            nuevosCromosomas[i] = new Cromosoma(this.cromosomas[elegido]);
 
+            /*
+            Si ya existe un cromosoma en esa posición, buscamos avanzamos la posición de la población sin añadir el cromsoma
+            que hemos encontrado en la ruleta con pesos
+             */
+            if (nuevosCromosomas[i] == null){
+                nuevosCromosomas[i] = new Cromosoma(this.cromosomas[elegido]);
+                i++;
+            }else {
+                i++;
+            }
         }
 
         this.cromosomas = nuevosCromosomas;
@@ -364,6 +387,22 @@ public class Poblacion {
 
 
     /**
+     * Método auxiliar para copiar la lista de cromosomas
+     *
+     * @param cromosomas
+     * @return
+     */
+    public Cromosoma[] copiarCromosomas(Cromosoma [] cromosomas){
+        Cromosoma [] listaCopia = new Cromosoma[this.cantidadCromosomas];
+        for (int i = 0; i < cantidadCromosomas; i++){
+            listaCopia[i] = new Cromosoma(this.cromosomas[i]);
+        }
+
+        return listaCopia;
+    }
+
+
+    /**
      * Método que calcula el mejor cromosoma de la población
      *
      * @return El mejor cromosoma de la población
@@ -378,6 +417,17 @@ public class Poblacion {
             }
         }
         return cromosomas[indice];
+    }
+
+    /**
+     * Método auxiliar para ordenar la lista de cromosomas según su aptitud, y poder escoger los mejores para el elitismo
+     *
+     * @param listaCromosoma
+     * @return lista ordenada según la aptitud de sus cromosomas
+     */
+    public Cromosoma[] ordenarCromosomas(Cromosoma[] listaCromosoma){
+        Arrays.sort(listaCromosoma);
+        return listaCromosoma;
     }
 
     /**
