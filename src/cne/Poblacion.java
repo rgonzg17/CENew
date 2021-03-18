@@ -19,7 +19,7 @@ public class Poblacion {
     /**
      * Cantidad de generaciones que se van a repetir
      */
-    private int maximoGeneraciones = 10;
+    private int maximoGeneraciones = 100;
 
 
     /**
@@ -31,6 +31,11 @@ public class Poblacion {
      * Variable que indica desde donde cortar en el cromosoma, por defecto se inicia en 2
      */
     private int puntoDeCorte = 2;
+
+    /**
+     * Probabilidad de cruzamiento
+     */
+    private float probabilidadCruzamiento= 0.9f;
 
     /**
      * Por defecto, la mutación será por cromosoma, a no ser que se ponga esta variable a true
@@ -46,6 +51,18 @@ public class Poblacion {
      * Probabilidad de que un cromosoma mute alguno de sus genes.
      */
     private float probabilidadMutacionCromosoma = 0.015f;
+
+    /**
+     * Si está false, se considerará el número de generaciones como condición de parada
+     * Si está true, se considerará el método condición de parada junto a la variable generaciónMejora
+     */
+    private boolean condicionParada = true;
+
+    /**
+     * Cantidad de generaciones que tiene que ser mejor la última de ellas para continuar iterando.
+     * Si la variable tiene el valor "2", el algoritmo deberá ser mejor que las dos últimas generaciones para continuar
+     */
+    private int generacionMejora = 5;
 
     /**
      * Si está en false, se mostrarán todas las generaciones en el gráfico.
@@ -179,9 +196,6 @@ public class Poblacion {
         /*
         Elitismo
         Se añade el numero de mejores cromosomassen una posición aleatoria dentro de la población
-         */
-
-        /*
         Creamos una lista auxiliar para ordenar los cromosomas por aptitud, y añadirlos a la nueva lista
          */
         Cromosoma [] cromosomasOrdenados = this.copiarCromosomas(this.cromosomas);
@@ -238,6 +252,7 @@ public class Poblacion {
     public Poblacion cruzar() throws AlgoritmoGeneticoExcepcion {
 
         int mezclaAux = 0;
+        float random = 0;
         if (this.puntoDeCorte >= this.getCantidadGenesCromosoma()) {
             throw new AlgoritmoGeneticoExcepcion("El punto de corte no puede ser mayor que el número de genes" +
                     "del cromosoma");
@@ -245,11 +260,16 @@ public class Poblacion {
 
 
         for (int i = 0; i < this.cantidadCromosomas; i += 2) {
-            for (int j = this.puntoDeCorte; j < this.getCantidadGenesCromosoma(); j++) {
-                mezclaAux = this.cromosomas[i].getGenes()[j];
-                this.cromosomas[i].getGenes()[j] = this.cromosomas[i + 1].getGenes()[j];
-                this.cromosomas[i + 1].getGenes()[j] = mezclaAux;
-            }
+            random = Extra.numeroAleatorioFlaot();
+            if (random < this.probabilidadCruzamiento) {
+                System.out.println("si");
+                for (int j = this.puntoDeCorte; j < this.getCantidadGenesCromosoma(); j++) {
+                    System.out.println("si");
+                    mezclaAux = this.cromosomas[i].getGenes()[j];
+                    this.cromosomas[i].getGenes()[j] = this.cromosomas[i + 1].getGenes()[j];
+                    this.cromosomas[i + 1].getGenes()[j] = mezclaAux;
+                }
+            }else System.out.println("no");
         }
         return new Poblacion(this.cromosomas);
     }
@@ -319,8 +339,15 @@ public class Poblacion {
      */
     public Cromosoma algoritmoGeneticoBaseString() throws AlgoritmoGeneticoExcepcion {
 
-        int generacion = 1;
+        /*
+        - Si la variable tipoParada tiene el valor 0, finalizará cuando el número de generaciones sea igual a la variable
+        global maximoGeneraciones
+        - Si la variable tipoParada tiene el valor 1, finalizará cuando se cumpla el método condicionParada()
+         */
+        int tipoParada = 0;
+        if (this.condicionParada == true) tipoParada = 1;
 
+        int generacion = 1;
         System.out.println("\n--------------------------------POBLACION INICIAL");
         this.crearPoblacion();
         System.out.println(this.toString());
@@ -371,7 +398,7 @@ public class Poblacion {
             generacion++;
 
 
-        } while (generacion < this.maximoGeneraciones);
+        } while (parada(tipoParada, generacion) == false);
 
 
         System.out.println("------------------------MEJOR CROMOSOMA:");
@@ -428,6 +455,48 @@ public class Poblacion {
     public Cromosoma[] ordenarCromosomas(Cromosoma[] listaCromosoma){
         Arrays.sort(listaCromosoma);
         return listaCromosoma;
+    }
+
+
+    /**
+     * Método auxiliar para determinar que tipo de parda se quiere para acabar con el agoritmo genético
+     * Ya sea según el máximo de generaciones o la condición de parada en el método condicionParada
+     *
+     * @param tipo
+     */
+    public boolean parada(int tipo, int generacion){
+        if (tipo == 0) return maximoGeneraciones(generacion);
+        else return condicionParada();
+    }
+
+    /**
+     * Método auxiliar para que la condición de parada del algoritmo genético sea la variable global, maximoGeneraciones
+     */
+
+    public boolean maximoGeneraciones(int generacion){
+        if (generacion < this.maximoGeneraciones)  return false;
+        else return true;
+    }
+
+    /**
+     * Método auxiliar para que el algortimo finalice si no es mejor que el alguna de las "generacionMejora"
+     * Si generacionMejora tiene el valor 1, la última aptitud del algoritmo deberá ser mejor que la anterior
+     * Si generacionMejora tiene el valor 2, la última aptitud del algoritmo deberá ser mejor que al menos uno de los dos anteriores
+     * @return
+     */
+    public boolean condicionParada(){
+
+       if (this.aptitudesGeneracion.size() <= this.generacionMejora) return false;
+
+       int i = this.aptitudesGeneracion.size() - this.generacionMejora;
+
+       while (i < this.aptitudesGeneracion.size()){
+           if ((int)this.aptitudesGeneracion.get(this.aptitudesGeneracion.size() - 1) < (int)this.aptitudesGeneracion.get(i-1)){
+               i++;
+           }
+           else return false;
+       }
+       return true;
     }
 
     /**
