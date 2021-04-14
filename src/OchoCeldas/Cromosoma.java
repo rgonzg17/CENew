@@ -1,4 +1,4 @@
-package cne;
+package OchoCeldas;
 
 public class Cromosoma implements Comparable<Cromosoma>{
 
@@ -7,7 +7,7 @@ public class Cromosoma implements Comparable<Cromosoma>{
     /**
      * Cantidad de genes que tiene cada cromosoma
      */
-    private int cantidadGenes = 4;
+    private int cantidadGenes = 10;
 
     //VARIABLES QUE NO SE PUEDEN MODIFICAR
     private int [] genes = new int[cantidadGenes];
@@ -19,7 +19,7 @@ public class Cromosoma implements Comparable<Cromosoma>{
      */
     public Cromosoma(){
         for (int i = 0; i < cantidadGenes ; i++){
-            genes[i] = 0;
+            genes[i] = -1;
         }
         aptitud = 0;
     }

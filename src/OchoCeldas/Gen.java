@@ -1,4 +1,4 @@
-package cne;
+package OchoCeldas;
 
 import excepciones.AlgoritmoGeneticoExcepcion;
 

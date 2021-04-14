@@ -1,97 +1,98 @@
-package cne;
+package OchoCeldas;
 
 import excepciones.AlgoritmoGeneticoExcepcion;
 import extras.Extra;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Poblacion {
 
 
+    private static final Cromosoma solucion = new Cromosoma();
     //VALORES QUE SE PUEDEN CAMBIAR
     /**
-     * Cantidad de cromosomas dentro de la población
+     * Cantidad de cromosomas dentro de la población (Necesario que sea par para realizar bien el cruzamiento
      */
-    private int cantidadCromosomas = 6;
+    private static final int cantidadCromosomas = 6;
 
     /**
      * Cantidad de generaciones que se van a repetir
      */
-    private int maximoGeneraciones = 100;
+    private static final int maximoGeneraciones = 100;
 
 
     /**
      * Número de mejores cromosomas que se van a seleccionar, por defecto solo se escogerá al mejor
      */
-    private int numeroElitismo = 3;
+    private static final int numeroElitismo = 3;
 
     /**
      * Variable que indica desde donde cortar en el cromosoma, por defecto se inicia en 2
      */
-    private int puntoDeCorte = 2;
+    private static final int puntoDeCorte = 4;
 
     /**
      * Probabilidad de cruzamiento
      */
-    private float probabilidadCruzamiento= 0.9f;
+    private static final float probabilidadCruzamiento= 0.9f;
 
     /**
      * Por defecto, la mutación será por cromosoma, a no ser que se ponga esta variable a true
      */
-    private boolean mutacionPorGenes = true;
+    private static final boolean mutacionPorGenes = true;
 
     /**
      * Probabilidad de que un gen de un cromosoma mute
      */
 
-    private float probabilidadMutacionGen = 0.015f;
+    private static final float probabilidadMutacionGen = 0.015f;
     /**
      * Probabilidad de que un cromosoma mute alguno de sus genes.
      */
-    private float probabilidadMutacionCromosoma = 0.015f;
+    private static final float probabilidadMutacionCromosoma = 0.015f;
 
     /**
      * Si está false, se considerará el número de generaciones como condición de parada
      * Si está true, se considerará el método condición de parada junto a la variable generaciónMejora
      */
-    private boolean condicionParada = true;
+    private static final boolean condicionParada = true;
 
     /**
      * Cantidad de generaciones que tiene que ser mejor la última de ellas para continuar iterando.
      * Si la variable tiene el valor "2", el algoritmo deberá ser mejor que las dos últimas generaciones para continuar
      */
-    private int generacionMejora = 5;
+    private static final int generacionMejora = 5;
 
     /**
      * Si está en false, se mostrarán todas las generaciones en el gráfico.
      * Si está en true, se mostrarán las generaciones de 10 en 10 en el gráfico
      */
-    private boolean intervaloGrafica = false;
+    private static final boolean intervaloGrafica = false;
 
     /**
      * Elegir cada cuantos números hacer un intervalo.
      * Solo estará habilitado cuando intervaloGrafica esté en true
      * Por defecto está en 10
      */
-    private int numeroIntervalo = 10;
+    private static final int numeroIntervalo = 10;
 
     /**
      * Mínimos que deben ser (según su par) menores que los máximos
      */
-    private int[] minimos = {1, 5, 2, 25, 15, 60, 8, 9};
+    private static int minimo = 0;
 
     /**
      * Máximos que deben ser (según su par) mayores que los mínimos
      */
-    private int[] maximos = {30, 10, 35, 100, 55, 200, 40, 50};
+    private static int maximo = 9;
 
 
     //VARIABLES QUE NO SE PUEDEN MODIFICAR
     private Cromosoma[] cromosomas = new Cromosoma[this.cantidadCromosomas];
-    private ArrayList aptitudesGeneracion = new ArrayList();
-    private ArrayList aptitudesMejorCromosomaGeneracion = new ArrayList();
+    private static final ArrayList aptitudesGeneracion = new ArrayList();
+    private static final ArrayList aptitudesMejorCromosomaGeneracion = new ArrayList();
     private int totalAptitudes;
 
     /**
@@ -114,19 +115,46 @@ public class Poblacion {
 
 
     /**
-     * Método para crear poblacion con números aleatorios
+     * Método para crear poblacion con números aleatorios entre 0 y 9 y diferentes
      *
      * @return Una población con todos los cromosomas creados de manera aleatoria
      */
     public Poblacion crearPoblacion() {
-
+        int numero = 0;
         for (int i = 0; i < this.cantidadCromosomas; i++) {
+            List<Integer> repetidos = new ArrayList<Integer>();
             for (int j = 0; j < this.getCantidadGenesCromosoma(); j++) {
-                this.cromosomas[i].getGenes()[j] = Extra.numeroAleatorio(minimos[j], maximos[j]);
+                /*
+                *Para que no se repitan números en cada cromosoma, añadimos los números que ya han salido a una lista
+                * y obligamos a recalcular el número si ya había salido anteriormente (Si está en la lista de números que
+                * ya han salido
+                */
+                while (repetidos.contains(numero))
+                    numero = Extra.numeroAleatorio(minimo,maximo);
+                this.cromosomas[i].getGenes()[j] = numero;
+                repetidos.add(numero);
             }
         }
         return new Poblacion(this.cromosomas);
     }
+
+    /**
+     * Método para crear la solución final, de forma aleatoria
+     *
+     * @return
+     */
+    public void crearSolucion(){
+
+        List<Integer> repetidos = new ArrayList<Integer>();
+        int numero =0;
+        for (int i=0; i<this.getCantidadGenesCromosoma(); i++){
+            while (repetidos.contains(numero))
+                numero = Extra.numeroAleatorio(minimo,maximo);
+            solucion.getGenes()[i] = numero;
+            repetidos.add(numero);
+        }
+    }
+
 
 
     /**
@@ -135,16 +163,26 @@ public class Poblacion {
      * @return Una lista de aptitudes de los cromosomas
      */
     public void evaluar() {
-
-        int aptitud = 0;
+        int aptitud=0;
         for (int i = 0; i < this.cantidadCromosomas; i++) {
-            for (int j = 0; j < this.getCantidadGenesCromosoma(); j++) {
-                aptitud += this.cromosomas[i].getGenes()[j];
-            }
+            aptitud =evaluarCromosoma(cromosomas[i]);
             this.cromosomas[i].setAptitud(aptitud);
-            aptitud = 0;
         }
 
+    }
+
+    public int evaluarCromosoma(Cromosoma cromosoma){
+
+        int aptitud=0;
+        boolean[] coincididoPosicion= new boolean[this.getCantidadGenesCromosoma()];
+        for (int j = 0; j < this.getCantidadGenesCromosoma(); j++) {
+            if (coincididoPosicion[j]==false)
+                if (solucion.getGenes()[j] == cromosoma.getGenes()[j]){
+                    aptitud+=2;
+                    coincididoPosicion[j] = true;
+           }
+        }
+        return aptitud;
     }
 
     /**
@@ -167,78 +205,26 @@ public class Poblacion {
      */
     public Poblacion seleccionar() {
 
-        int[] rango = new int[this.cantidadCromosomas];
-        int random = 0, randomElitismo = 0, elegido = 0;
-        Cromosoma[] nuevosCromosomas = new Cromosoma[this.cantidadCromosomas];
+       Cromosoma[] nuevosCromosomas = new Cromosoma[this.cantidadCromosomas];
+       int random=0;
+       int cantidadLuchadores = 30*getCantidadCromosomas()/100;
+       for (int i = 0; i<getCantidadCromosomas(); i++){
+           List<Cromosoma> listaLuchadores = new ArrayList<Cromosoma>();
 
-        /*
-        Calculamos el rango de aptitudes (la rueda de selección). Aquellos que tengan más aptitud, tendrán más espectro
-        Y por tanto una posibilidad relativa a su aptitud
-        */
-        rango[0] = this.cromosomas[0].getAptitud();
-        for (int i = 1; i < this.cantidadCromosomas; i++) {
-            rango[i] = rango[i - 1] + this.cromosomas[i].getAptitud();
-        }
-        rango[this.cantidadCromosomas - 1] = rango[this.cantidadCromosomas - 2] + this.cromosomas[this.cantidadCromosomas - 1].getAptitud();
+           for (int j=0; j<cantidadLuchadores;j++){
+               while (listaLuchadores.contains(cromosomas[random])) {
+                   random = Extra.numeroAleatorio(0,getCantidadCromosomas()-1);
+               }
+               listaLuchadores.add(cromosomas[random]);
+           }
+           while (nuevosCromosomas[random]!=null) {
+               random = Extra.numeroAleatorio(0,getCantidadCromosomas()-1);
+           }
+           nuevosCromosomas[random] = listaLuchadores.stream().max(Cromosoma::compareTo).get();
+           System.out.println(nuevosCromosomas[random]+"         "+random);
 
-        /*
-        Generamos un número aleatorio, y según donde caiga dentro del array de rangos, se añadirá el cromosoma relativo
-        a su posición a la lista final de la población
-         */
-        System.out.println("RANGO");
-        for (int k = 0; k < this.cantidadCromosomas; k++) {
-            System.out.print(rango[k] + ",");
-        }
-        System.out.println();
-
-        this.totalAptitudes = this.calcularTotal();
-
-        /*
-        Elitismo
-        Se añade el numero de mejores cromosomassen una posición aleatoria dentro de la población
-        Creamos una lista auxiliar para ordenar los cromosomas por aptitud, y añadirlos a la nueva lista
-         */
-        Cromosoma [] cromosomasOrdenados = this.copiarCromosomas(this.cromosomas);
-        this.ordenarCromosomas(cromosomasOrdenados);
-        int x = 0;
-        while (x < this.numeroElitismo){
-
-            randomElitismo = Extra.numeroAleatorio(0,this.cantidadCromosomas-1);
-            if(nuevosCromosomas[randomElitismo] == null){
-                nuevosCromosomas[randomElitismo] = new Cromosoma(cromosomasOrdenados[x]);
-                x++;
-            }
-
-        }
-
-        int i = 0;
-        while(i < this.cantidadCromosomas){
-
-            random = Extra.numeroAleatorio(0, this.totalAptitudes);
-            elegido = 0;
-
-            while (random > rango[elegido]) {
-                if (elegido < this.cantidadCromosomas)
-                    elegido++;
-            }
-
-            System.out.println("RANDOM");
-            System.out.println(random + " y el cromosoma escogido es : " + elegido);
-            System.out.println(this.cromosomas[elegido]);
-
-            /*
-            Si ya existe un cromosoma en esa posición, buscamos avanzamos la posición de la población sin añadir el cromsoma
-            que hemos encontrado en la ruleta con pesos
-             */
-            if (nuevosCromosomas[i] == null){
-                nuevosCromosomas[i] = new Cromosoma(this.cromosomas[elegido]);
-                i++;
-            }else {
-                i++;
-            }
-        }
-
-        this.cromosomas = nuevosCromosomas;
+       }
+       this.cromosomas = nuevosCromosomas;
 
         return new Poblacion(this.cromosomas);
     }
@@ -250,27 +236,59 @@ public class Poblacion {
      * @throws AlgoritmoGeneticoExcepcion
      */
     public Poblacion cruzar() throws AlgoritmoGeneticoExcepcion {
-
-        int mezclaAux = 0;
-        float random = 0;
-        if (this.puntoDeCorte >= this.getCantidadGenesCromosoma()) {
-            throw new AlgoritmoGeneticoExcepcion("El punto de corte no puede ser mayor que el número de genes" +
-                    "del cromosoma");
-        }
-
-
-        for (int i = 0; i < this.cantidadCromosomas; i += 2) {
-            random = Extra.numeroAleatorioFlaot();
-            if (random < this.probabilidadCruzamiento) {
-                System.out.println("si");
-                for (int j = this.puntoDeCorte; j < this.getCantidadGenesCromosoma(); j++) {
-                    System.out.println("si");
-                    mezclaAux = this.cromosomas[i].getGenes()[j];
-                    this.cromosomas[i].getGenes()[j] = this.cromosomas[i + 1].getGenes()[j];
-                    this.cromosomas[i + 1].getGenes()[j] = mezclaAux;
+        Cromosoma[] nuevosCromosomas = new Cromosoma[this.cantidadCromosomas];
+        int random=Integer.MIN_VALUE;
+        for (int i=0; i<getCantidadCromosomas()-1;i+=2){
+            List<Integer> listaPadre1 = new ArrayList<Integer>();
+            List<Integer> listaPadre2 = new ArrayList<Integer>();
+            List<Integer> numerosOcupadosHijo1 = new ArrayList<Integer>();
+            List<Integer> numerosOcupadosHijo2 = new ArrayList<Integer>();
+            Cromosoma hijo1 = new Cromosoma();
+            Cromosoma hijo2 = new Cromosoma();
+            Cromosoma padre1 = new Cromosoma(cromosomas[i]);
+            Cromosoma padre2 = new Cromosoma(cromosomas[i+1]);
+            for (int j = puntoDeCorte; j<getCantidadGenesCromosoma(); j++){
+                listaPadre1.add(padre1.getGenes()[j]);
+                listaPadre2.add(padre2.getGenes()[j]);
+                hijo1.getGenes()[j] = listaPadre2.get(j-puntoDeCorte);
+                hijo2.getGenes()[j] = listaPadre1.get(j-puntoDeCorte);
+                numerosOcupadosHijo1.add(hijo1.getGenes()[j]);
+                numerosOcupadosHijo2.add(hijo2.getGenes()[j]);
+            }
+            for (int j = 0; j<puntoDeCorte;j++) {
+                if (!numerosOcupadosHijo1.contains(padre1.getGenes()[j])) {
+                    hijo1.getGenes()[j] = padre1.getGenes()[j];
+                    numerosOcupadosHijo1.add(hijo1.getGenes()[j]);
                 }
-            }else System.out.println("no");
+                if (!numerosOcupadosHijo2.contains(padre2.getGenes()[j])) {
+                    hijo2.getGenes()[j] = padre2.getGenes()[j];
+                    numerosOcupadosHijo2.add(hijo2.getGenes()[j]);
+                }
+            }
+
+            for (int j = 0; j<getCantidadGenesCromosoma();j++) {
+                if (hijo1.getGenes()[j]==-1){
+                    random = Extra.numeroAleatorio(minimo,maximo);
+                    while (numerosOcupadosHijo1.contains(random)){
+                        random = Extra.numeroAleatorio(minimo,maximo);
+                    }
+                    hijo1.getGenes()[j] = random;
+                    numerosOcupadosHijo1.add(hijo1.getGenes()[j]);
+                }
+                if (hijo2.getGenes()[j]==-1){
+                    random = Extra.numeroAleatorio(minimo,maximo);
+                    while (numerosOcupadosHijo2.contains(random)){
+                        random = Extra.numeroAleatorio(minimo,maximo);
+                    }
+                    hijo2.getGenes()[j] = random;
+                    numerosOcupadosHijo2.add(hijo2.getGenes()[j]);
+                }
+            }
+            nuevosCromosomas[i] = hijo1;
+            nuevosCromosomas[i+1]= hijo2;
         }
+        this.cromosomas = nuevosCromosomas;
+
         return new Poblacion(this.cromosomas);
     }
 
@@ -290,7 +308,7 @@ public class Poblacion {
                     randomMutacion = Extra.numeroAleatorioFlaot();
                     randomGen = Extra.numeroAleatorio(0, this.getCantidadGenesCromosoma() - 1);
                     if (randomMutacion < this.probabilidadMutacionGen) {
-                        this.cromosomas[i].getGenes()[randomGen] = Extra.numeroAleatorio(minimos[randomGen], maximos[randomGen]);
+                        this.cromosomas[i].getGenes()[randomGen] = Extra.numeroAleatorio(minimo, maximo);
                     }
 
                 }
@@ -300,7 +318,7 @@ public class Poblacion {
                 randomMutacion = Extra.numeroAleatorioFlaot();
                 randomGen = Extra.numeroAleatorio(0, this.getCantidadGenesCromosoma() - 1);
                 if (randomMutacion < this.probabilidadMutacionCromosoma) {
-                    this.cromosomas[i].getGenes()[randomGen] = Extra.numeroAleatorio(minimos[randomGen], maximos[randomGen]);
+                    this.cromosomas[i].getGenes()[randomGen] = Extra.numeroAleatorio(minimo, maximo);
                 }
             }
 
@@ -352,6 +370,23 @@ public class Poblacion {
         this.crearPoblacion();
         System.out.println(this.toString());
 
+        System.out.println("\n--------------------------------CREAMOS SOLUCION");
+        this.crearSolucion();
+        System.out.println(solucion.toString());
+
+        System.out.println("\n--------------------------------EVALUAR");
+        this.evaluar();
+        System.out.println(this.toString());
+
+        //System.out.println("\n--------------------------------SELECCIONAR");
+        //this.seleccionar();
+        //System.out.println(this.toString());
+
+        System.out.println("\n--------------------------------CRUZAR");
+        this.cruzar();
+        System.out.println(this.toString());
+
+        /*
         do {
             this.evaluar();
 
@@ -410,7 +445,11 @@ public class Poblacion {
         new Ventana(this.aptitudesGeneracion, 0);
         new Ventana(this.aptitudesMejorCromosomaGeneracion, 1);
         return mejorCromosoma();
+
+         */
+        return mejorCromosoma();
     }
+
 
 
     /**
@@ -486,17 +525,17 @@ public class Poblacion {
      */
     public boolean condicionParada(){
 
-       if (this.aptitudesGeneracion.size() <= this.generacionMejora) return false;
+        if (this.aptitudesGeneracion.size() <= this.generacionMejora) return false;
 
-       int i = this.aptitudesGeneracion.size() - this.generacionMejora;
+        int i = this.aptitudesGeneracion.size() - this.generacionMejora;
 
-       while (i < this.aptitudesGeneracion.size()){
-           if ((int)this.aptitudesGeneracion.get(this.aptitudesGeneracion.size() - 1) < (int)this.aptitudesGeneracion.get(i-1)){
-               i++;
-           }
-           else return false;
-       }
-       return true;
+        while (i < this.aptitudesGeneracion.size()){
+            if ((int)this.aptitudesGeneracion.get(this.aptitudesGeneracion.size() - 1) < (int)this.aptitudesGeneracion.get(i-1)){
+                i++;
+            }
+            else return false;
+        }
+        return true;
     }
 
     /**

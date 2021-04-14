@@ -1,4 +1,6 @@
-import cne.Poblacion;
+package algoritmoGeneticoBase;
+
+import algoritmoGeneticoBase.Poblacion;
 import excepciones.AlgoritmoGeneticoExcepcion;
 
 public class Main {
