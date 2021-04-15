@@ -47,11 +47,11 @@ public class Poblacion {
      * Probabilidad de que un gen de un cromosoma mute
      */
 
-    private static final float probabilidadMutacionGen = 0.015f;
+    private static final float probabilidadMutacionGen = 0.2f;
     /**
      * Probabilidad de que un cromosoma mute alguno de sus genes.
      */
-    private static final float probabilidadMutacionCromosoma = 0.015f;
+    private static final float probabilidadMutacionCromosoma = 0.15f;
 
     /**
      * Si está false, se considerará el número de generaciones como condición de parada
@@ -207,22 +207,30 @@ public class Poblacion {
 
        Cromosoma[] nuevosCromosomas = new Cromosoma[this.cantidadCromosomas];
        int random=0;
-       int cantidadLuchadores = 30*getCantidadCromosomas()/100;
+       int cantidadLuchadores = 5;
        for (int i = 0; i<getCantidadCromosomas(); i++){
            List<Cromosoma> listaLuchadores = new ArrayList<Cromosoma>();
+           List<Integer> listaPosicionesLuchadores = new ArrayList<Integer>();
 
            for (int j=0; j<cantidadLuchadores;j++){
                while (listaLuchadores.contains(cromosomas[random])) {
                    random = Extra.numeroAleatorio(0,getCantidadCromosomas()-1);
                }
                listaLuchadores.add(cromosomas[random]);
+               listaPosicionesLuchadores.add(random);
            }
            while (nuevosCromosomas[random]!=null) {
                random = Extra.numeroAleatorio(0,getCantidadCromosomas()-1);
            }
-           nuevosCromosomas[random] = listaLuchadores.stream().max(Cromosoma::compareTo).get();
-           System.out.println(nuevosCromosomas[random]+"         "+random);
+           System.out.println("LUCHADORES QUE COMPITEN: ");
+           for (Cromosoma cadaUno:listaLuchadores) {
+               System.out.println(cadaUno + "  "+cadaUno.getAptitud());
+           }
+           System.out.println("EL MEJOR: " + listaLuchadores.stream().min(Cromosoma::compareTo)+" "+listaLuchadores.stream().min(Cromosoma::compareTo).get().getAptitud()+" En: "+
+                   listaLuchadores.indexOf(listaLuchadores.stream().min(Cromosoma::compareTo).get()));
 
+           nuevosCromosomas[i] = new Cromosoma(cromosomas[listaPosicionesLuchadores.get(listaLuchadores.indexOf(listaLuchadores.stream().min(Cromosoma::compareTo).get()))]);
+           System.out.println("COINCIDE?: "+nuevosCromosomas[i]);
        }
        this.cromosomas = nuevosCromosomas;
 
@@ -237,7 +245,7 @@ public class Poblacion {
      */
     public Poblacion cruzar() throws AlgoritmoGeneticoExcepcion {
         Cromosoma[] nuevosCromosomas = new Cromosoma[this.cantidadCromosomas];
-        int random=Integer.MIN_VALUE;
+        int random;
         for (int i=0; i<getCantidadCromosomas()-1;i+=2){
             List<Integer> listaPadre1 = new ArrayList<Integer>();
             List<Integer> listaPadre2 = new ArrayList<Integer>();
@@ -267,22 +275,8 @@ public class Poblacion {
             }
 
             for (int j = 0; j<getCantidadGenesCromosoma();j++) {
-                if (hijo1.getGenes()[j]==-1){
-                    random = Extra.numeroAleatorio(minimo,maximo);
-                    while (numerosOcupadosHijo1.contains(random)){
-                        random = Extra.numeroAleatorio(minimo,maximo);
-                    }
-                    hijo1.getGenes()[j] = random;
-                    numerosOcupadosHijo1.add(hijo1.getGenes()[j]);
-                }
-                if (hijo2.getGenes()[j]==-1){
-                    random = Extra.numeroAleatorio(minimo,maximo);
-                    while (numerosOcupadosHijo2.contains(random)){
-                        random = Extra.numeroAleatorio(minimo,maximo);
-                    }
-                    hijo2.getGenes()[j] = random;
-                    numerosOcupadosHijo2.add(hijo2.getGenes()[j]);
-                }
+                rellenarHijos(numerosOcupadosHijo1, hijo1, j);
+                rellenarHijos(numerosOcupadosHijo2, hijo2, j);
             }
             nuevosCromosomas[i] = hijo1;
             nuevosCromosomas[i+1]= hijo2;
@@ -290,6 +284,18 @@ public class Poblacion {
         this.cromosomas = nuevosCromosomas;
 
         return new Poblacion(this.cromosomas);
+    }
+
+    private void rellenarHijos(List<Integer> numerosOcupadosHijo, Cromosoma hijo, int j) {
+        int random;
+        if (hijo.getGenes()[j]==-1){
+            random = Extra.numeroAleatorio(minimo,maximo);
+            while (numerosOcupadosHijo.contains(random)){
+                random = Extra.numeroAleatorio(minimo,maximo);
+            }
+            hijo.getGenes()[j] = random;
+            numerosOcupadosHijo.add(hijo.getGenes()[j]);
+        }
     }
 
     /**
@@ -300,30 +306,38 @@ public class Poblacion {
     public Poblacion mutar() {
 
         float randomMutacion = 0f;
-        int randomGen = 0;
 
         if (this.mutacionPorGenes == true) {
             for (int i = 0; i < this.cantidadCromosomas; i++) {
                 for (int j = 0; j < this.getCantidadGenesCromosoma(); j++) {
-                    randomMutacion = Extra.numeroAleatorioFlaot();
-                    randomGen = Extra.numeroAleatorio(0, this.getCantidadGenesCromosoma() - 1);
-                    if (randomMutacion < this.probabilidadMutacionGen) {
-                        this.cromosomas[i].getGenes()[randomGen] = Extra.numeroAleatorio(minimo, maximo);
-                    }
-
+                    cambioDeValores(i);
                 }
             }
         } else {
             for (int i = 0; i < this.cantidadCromosomas; i++) {
                 randomMutacion = Extra.numeroAleatorioFlaot();
-                randomGen = Extra.numeroAleatorio(0, this.getCantidadGenesCromosoma() - 1);
                 if (randomMutacion < this.probabilidadMutacionCromosoma) {
-                    this.cromosomas[i].getGenes()[randomGen] = Extra.numeroAleatorio(minimo, maximo);
+                     cambioDeValores( i);
                 }
             }
 
         }
         return new Poblacion(this.cromosomas);
+    }
+
+    private void cambioDeValores(int i) {
+        float randomMutacion;
+        int randomGen1, randomGen2 = 0;
+        int aux;
+        randomMutacion = Extra.numeroAleatorioFlaot();
+        randomGen1 = Extra.numeroAleatorio(0, this.getCantidadGenesCromosoma() - 1);
+        while (randomGen1==randomGen2)
+            randomGen2= Extra.numeroAleatorio(0, this.getCantidadGenesCromosoma() - 1);
+        if (randomMutacion < this.probabilidadMutacionGen) {
+            aux = this.cromosomas[i].getGenes()[randomGen1];
+            this.cromosomas[i].getGenes()[randomGen1] = this.cromosomas[i].getGenes()[randomGen2];
+            this.cromosomas[i].getGenes()[randomGen2] = aux;
+        }
     }
 
     /**
@@ -374,19 +388,7 @@ public class Poblacion {
         this.crearSolucion();
         System.out.println(solucion.toString());
 
-        System.out.println("\n--------------------------------EVALUAR");
-        this.evaluar();
-        System.out.println(this.toString());
 
-        //System.out.println("\n--------------------------------SELECCIONAR");
-        //this.seleccionar();
-        //System.out.println(this.toString());
-
-        System.out.println("\n--------------------------------CRUZAR");
-        this.cruzar();
-        System.out.println(this.toString());
-
-        /*
         do {
             this.evaluar();
 
@@ -433,7 +435,7 @@ public class Poblacion {
             generacion++;
 
 
-        } while (parada(tipoParada, generacion) == false);
+        } while (mejorCromosoma().esMismoCromosoma(solucion)==false);
 
 
         System.out.println("------------------------MEJOR CROMOSOMA:");
@@ -446,8 +448,6 @@ public class Poblacion {
         new Ventana(this.aptitudesMejorCromosomaGeneracion, 1);
         return mejorCromosoma();
 
-         */
-        return mejorCromosoma();
     }
 
 
@@ -503,9 +503,9 @@ public class Poblacion {
      *
      * @param tipo
      */
-    public boolean parada(int tipo, int generacion){
+    public boolean parada(int tipo, int generacion, Cromosoma mejorCromosoma){
         if (tipo == 0) return maximoGeneraciones(generacion);
-        else return condicionParada();
+        else return condicionParada(mejorCromosoma);
     }
 
     /**
@@ -523,19 +523,8 @@ public class Poblacion {
      * Si generacionMejora tiene el valor 2, la última aptitud del algoritmo deberá ser mejor que al menos uno de los dos anteriores
      * @return
      */
-    public boolean condicionParada(){
-
-        if (this.aptitudesGeneracion.size() <= this.generacionMejora) return false;
-
-        int i = this.aptitudesGeneracion.size() - this.generacionMejora;
-
-        while (i < this.aptitudesGeneracion.size()){
-            if ((int)this.aptitudesGeneracion.get(this.aptitudesGeneracion.size() - 1) < (int)this.aptitudesGeneracion.get(i-1)){
-                i++;
-            }
-            else return false;
-        }
-        return true;
+    public boolean condicionParada(Cromosoma mejorCromosoma){
+        return mejorCromosoma.compareTo(solucion) == 0;
     }
 
     /**

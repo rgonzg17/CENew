@@ -75,6 +75,15 @@ public class Cromosoma implements Comparable<Cromosoma>{
         return this.cantidadGenes;
     }
 
+    public boolean esMismoCromosoma(Cromosoma cromosoma){
+        int contador=0;
+        for (int i=0; i<cantidadGenes;i++){
+            if (genes[i]==cromosoma.genes[i])
+                contador++;
+        }
+        return contador==cantidadGenes;
+    }
+
     @Override
     public int compareTo(Cromosoma cromosoma){
         if (this.aptitud < cromosoma.aptitud){
