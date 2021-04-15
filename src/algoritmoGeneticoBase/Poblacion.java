@@ -9,7 +9,8 @@ import java.util.Arrays;
 
 public class Poblacion {
 
-    //VALORES QUE SE PUEDEN CAMBIAR
+    //VARIABLES QUE SE PUEDEN MODIFICAR
+
     /**
      * Cantidad de cromosomas dentro de la población
      */
@@ -132,6 +133,11 @@ public class Poblacion {
      */
     private static final boolean DEBUG_MUTAR = false;
 
+    /**
+     * Mostrar por pantalla el tiempo que tarda en ejecutar el programa
+     */
+    private static final boolean DEBUG_TIEMPO = false;
+
     //VARIABLES QUE NO SE PUEDEN MODIFICAR
     private Cromosoma[] cromosomas = new Cromosoma[this.CANTIDAD_CROMOSOMAS];
     private static final ArrayList aptitudesGeneracion = new ArrayList();
@@ -154,6 +160,67 @@ public class Poblacion {
      */
     public Poblacion(Cromosoma cromosomas[]) {
         this.cromosomas = cromosomas;
+    }
+
+    /**
+     * Método que calcula toda la secuencia del algoritmo genético
+     *
+     * @return Mejor cromosoma al final de la ejecución
+     * @throws AlgoritmoGeneticoExcepcion
+     */
+    public Cromosoma algoritmoGenetico() throws AlgoritmoGeneticoExcepcion {
+
+        long startTime = System.currentTimeMillis();
+        debugTiempo("Comienza el programa: ");
+        /*
+         *  - Si la variable tipoParada tiene el valor 0, finalizará cuando el número de generaciones sea igual a la variable
+         * global maximoGeneraciones
+         * - Si la variable tipoParada tiene el valor 1, finalizará cuando se cumpla el método condicionParada()
+         */
+        int tipoParada = 0;
+        if (this.CONDICION_PARADA == true) tipoParada = 1;
+
+        int generacion = 1;
+        this.crearPoblacion();
+        debugCreacion(this.toString() + "\n");
+        debugCreacion("Las aptitudes todavía son 0 puesto que no han sido calculadas en el método evaluar\n");
+
+        do {
+            System.out.println("------GENERACIÓN: " + generacion + "------\n");
+
+            this.evaluar();
+            this.seleccionar();
+            this.cruzar();
+            this.mutar();
+            this.evaluar();
+
+            System.out.println("\n------TOTAL FINAL Generacion: " + generacion + "------");
+            System.out.println(this.calcularTotal() + "\n");
+
+            if (this.INTERVALO_GRAFICA == true) {
+                if (generacion % this.NUMERO_INTERVALO == 0) {
+                    this.aptitudesGeneracion.add(totalAptitudes);
+                    this.aptitudesMejorCromosomaGeneracion.add(mejorCromosoma().getAptitud());
+                }
+            } else {
+                this.aptitudesGeneracion.add(totalAptitudes);
+                this.aptitudesMejorCromosomaGeneracion.add(mejorCromosoma().getAptitud());
+            }
+            generacion++;
+
+        } while (parada(tipoParada, generacion) == false);
+
+        System.out.println("------MEJOR CROMOSOMA: ------");
+        System.out.print(this.mejorCromosoma().toString());
+        System.out.println("Aptitud: " + this.mejorCromosoma().getAptitud());
+
+        new Ventana(this.aptitudesGeneracion, 0);
+        new Ventana(this.aptitudesMejorCromosomaGeneracion, 1);
+
+        long endTime = System.currentTimeMillis() - startTime;
+        debugTiempo("El programa ha tardado: "+endTime+"ms");
+
+        return mejorCromosoma();
     }
 
     /**
@@ -424,60 +491,6 @@ public class Poblacion {
         return new Poblacion(this.cromosomas);
     }
 
-    /**
-     * Método que calcula toda la secuencia del algoritmo genético
-     *
-     * @return Mejor cromosoma al final de la ejecución
-     * @throws AlgoritmoGeneticoExcepcion
-     */
-    public Cromosoma algoritmoGenetico() throws AlgoritmoGeneticoExcepcion {
-
-        /*
-         *  - Si la variable tipoParada tiene el valor 0, finalizará cuando el número de generaciones sea igual a la variable
-         * global maximoGeneraciones
-         * - Si la variable tipoParada tiene el valor 1, finalizará cuando se cumpla el método condicionParada()
-         */
-        int tipoParada = 0;
-        if (this.CONDICION_PARADA == true) tipoParada = 1;
-
-        int generacion = 1;
-        this.crearPoblacion();
-        debugCreacion(this.toString() + "\n");
-        debugCreacion("Las aptitudes todavía son 0 puesto que no han sido calculadas en el método evaluar\n");
-
-        do {
-            System.out.println("------GENERACIÓN: " + generacion + "------\n");
-
-            this.evaluar();
-            this.seleccionar();
-            this.cruzar();
-            this.mutar();
-            this.evaluar();
-
-            System.out.println("\n------TOTAL FINAL Generacion: " + generacion + "------");
-            System.out.println(this.calcularTotal() + "\n");
-
-            if (this.INTERVALO_GRAFICA == true) {
-                if (generacion % this.NUMERO_INTERVALO == 0) {
-                    this.aptitudesGeneracion.add(totalAptitudes);
-                    this.aptitudesMejorCromosomaGeneracion.add(mejorCromosoma().getAptitud());
-                }
-            } else {
-                this.aptitudesGeneracion.add(totalAptitudes);
-                this.aptitudesMejorCromosomaGeneracion.add(mejorCromosoma().getAptitud());
-            }
-            generacion++;
-
-        } while (parada(tipoParada, generacion) == false);
-
-        System.out.println("------MEJOR CROMOSOMA: ------");
-        System.out.print(this.mejorCromosoma().toString());
-        System.out.println("Aptitud: " + this.mejorCromosoma().getAptitud());
-
-        new Ventana(this.aptitudesGeneracion, 0);
-        new Ventana(this.aptitudesMejorCromosomaGeneracion, 1);
-        return mejorCromosoma();
-    }
 
     /**
      * Método auxiliar para copiar la lista de cromosomas
@@ -543,7 +556,7 @@ public class Poblacion {
     }
 
     /**
-     * Método auxiliar para que el algortimo finalice si no es mejor que el alguna de las "generacionMejora"
+     * Método auxiliar para que el algoritmo finalice si no es mejor que el alguna de las "generacionMejora"
      * Si generacionMejora tiene el valor 1, la última aptitud del algoritmo deberá ser mejor que la anterior
      * Si generacionMejora tiene el valor 2, la última aptitud del algoritmo deberá ser mejor que al menos uno de los dos anteriores
      *
@@ -625,6 +638,16 @@ public class Poblacion {
     private static void debugMutacion(String accion) {
         if (DEBUG_MUTAR) System.out.println(accion);
     }
+
+    /**
+     * Método para sacar por pantalla las acciones de la mutacion de la población
+     *
+     * @param accion
+     */
+    private static void debugTiempo(String accion) {
+        if (DEBUG_TIEMPO) System.out.println(accion);
+    }
+
 
     /**
      * Método para mostrar por pantalla los genes de cada cromosoma de una forma clara

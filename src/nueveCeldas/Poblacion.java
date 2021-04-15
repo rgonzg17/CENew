@@ -9,7 +9,8 @@ import java.util.List;
 
 public class Poblacion {
 
-    //VALORES QUE SE PUEDEN CAMBIAR
+    //VARIABLES QUE SE PUEDEN MODIFICAR
+
     /**
      * Cantidad de cromosomas dentro de la población (Necesario que sea par para realizar bien el cruzamiento
      * <p>
@@ -18,19 +19,9 @@ public class Poblacion {
     private static final int CANTIDAD_CROMOSOMAS = 6;
 
     /**
-     * Cantidad de generaciones que se van a repetir
-     */
-    private static final int MAXIMO_GENERACIONES = 100;
-
-    /**
      * Variable que indica desde donde cortar en el cromosoma, por defecto se inicia en 2
      */
     private static final int PUNTO_DE_CORTE = 4;
-
-    /**
-     * Probabilidad de cruzamiento
-     */
-    private static final float PROBABILIDAD_CRUZAMIENTO = 0.9f;
 
     /**
      * Por defecto, la mutación será por cromosoma, a no ser que se ponga esta variable a true
@@ -82,27 +73,32 @@ public class Poblacion {
     /**
      * Mostrar por pantalla la creacion de la población
      */
-    private static final boolean DEBUG_CREAR = true;
+    private static final boolean DEBUG_CREAR = false;
 
     /**
      * Mostrar por pantalla la evaluación de los cromosomas de la población
      */
-    private static final boolean DEBUG_EVALUAR = true;
+    private static final boolean DEBUG_EVALUAR = false;
 
     /**
      * Mostrar por pantalla la selección de los cromosomas de la población
      */
-    private static final boolean DEBUG_SELECCIONAR = true;
+    private static final boolean DEBUG_SELECCIONAR = false;
 
     /**
      * Mostrar por pantalla el cruce de los cromosomas de la población
      */
-    private static final boolean DEBUG_CRUZAR = true;
+    private static final boolean DEBUG_CRUZAR = false;
 
     /**
      * Mostrar por pantalla la mutación de la población
      */
-    private static final boolean DEBUG_MUTAR = true;
+    private static final boolean DEBUG_MUTAR = false;
+
+    /**
+     * Mostrar por pantalla el tiempo que tarda en ejecutar el programa
+     */
+    private static final boolean DEBUG_TIEMPO = true;
 
     //VARIABLES QUE NO SE PUEDEN MODIFICAR
     private Cromosoma[] cromosomas = new Cromosoma[this.CANTIDAD_CROMOSOMAS];
@@ -120,6 +116,8 @@ public class Poblacion {
         }
     }
 
+
+
     /**
      * Constructor con cromosomas creados
      *
@@ -129,6 +127,63 @@ public class Poblacion {
         this.cromosomas = cromosomas;
     }
 
+
+    /**
+     * Método que calcula toda la secuencia del algoritmo genético
+     *
+     * @return Mejor cromosoma al final de la ejecución
+     * @throws AlgoritmoGeneticoExcepcion
+     */
+    public Cromosoma algoritmoGenetico() throws AlgoritmoGeneticoExcepcion {
+
+        long startTime = System.currentTimeMillis();
+        debugTiempo("Comienza el programa: ");
+
+        int generacion = 1;
+        this.crearPoblacion();
+        debugCreacion(this.toString() + "\n");
+        debugCreacion("Las aptitudes todavía son -1 puesto que no han sido calculadas en el método evaluar\n");
+
+        this.crearSolucion();
+
+        do {
+            System.out.println("------GENERACIÓN: " + generacion + "------\n");
+
+            this.evaluar();
+            this.seleccionar();
+            this.cruzar();
+            this.mutar();
+            this.evaluar();
+
+            System.out.println("\n------TOTAL FINAL Generacion: " + generacion + "------");
+            System.out.println(this.calcularTotal() + "\n");
+
+            if (this.INTERVALO_GRAFICA == true) {
+                if (generacion % this.NUMERO_INTERVALO == 0) {
+                    this.aptitudesGeneracion.add(totalAptitudes);
+                    this.aptitudesMejorCromosomaGeneracion.add(mejorCromosoma().getAptitud());
+                }
+            } else {
+                this.aptitudesGeneracion.add(totalAptitudes);
+                this.aptitudesMejorCromosomaGeneracion.add(mejorCromosoma().getAptitud());
+            }
+            generacion++;
+
+        } while (mejorCromosoma().esMismoCromosoma(solucion) == false);
+
+        System.out.println("------MEJOR CROMOSOMA: ------");
+        System.out.print(this.mejorCromosoma().toString());
+        System.out.println("Aptitud: " + this.mejorCromosoma().getAptitud());
+
+        new Ventana(this.aptitudesGeneracion, 0);
+        new Ventana(this.aptitudesMejorCromosomaGeneracion, 1);
+
+        long endTime = System.currentTimeMillis() - startTime;
+        debugTiempo("El programa ha tardado: "+endTime+"ms");
+
+        return mejorCromosoma();
+
+    }
     /**
      * Método para crear poblacion con números aleatorios entre 0 y 9 y diferentes
      *
@@ -467,55 +522,6 @@ public class Poblacion {
         }
     }
 
-    /**
-     * Método que calcula toda la secuencia del algoritmo genético
-     *
-     * @return Mejor cromosoma al final de la ejecución
-     * @throws AlgoritmoGeneticoExcepcion
-     */
-    public Cromosoma algoritmoGenetico() throws AlgoritmoGeneticoExcepcion {
-
-        int generacion = 1;
-        this.crearPoblacion();
-        debugCreacion(this.toString() + "\n");
-        debugCreacion("Las aptitudes todavía son -1 puesto que no han sido calculadas en el método evaluar\n");
-
-        this.crearSolucion();
-
-        do {
-            System.out.println("------GENERACIÓN: " + generacion + "------\n");
-
-            this.evaluar();
-            this.seleccionar();
-            this.cruzar();
-            this.mutar();
-            this.evaluar();
-
-            System.out.println("\n------TOTAL FINAL Generacion: " + generacion + "------");
-            System.out.println(this.calcularTotal() + "\n");
-
-            if (this.INTERVALO_GRAFICA == true) {
-                if (generacion % this.NUMERO_INTERVALO == 0) {
-                    this.aptitudesGeneracion.add(totalAptitudes);
-                    this.aptitudesMejorCromosomaGeneracion.add(mejorCromosoma().getAptitud());
-                }
-            } else {
-                this.aptitudesGeneracion.add(totalAptitudes);
-                this.aptitudesMejorCromosomaGeneracion.add(mejorCromosoma().getAptitud());
-            }
-            generacion++;
-
-        } while (mejorCromosoma().esMismoCromosoma(solucion) == false);
-
-        System.out.println("------MEJOR CROMOSOMA: ------");
-        System.out.print(this.mejorCromosoma().toString());
-        System.out.println("Aptitud: " + this.mejorCromosoma().getAptitud());
-
-        new Ventana(this.aptitudesGeneracion, 0);
-        new Ventana(this.aptitudesMejorCromosomaGeneracion, 1);
-        return mejorCromosoma();
-
-    }
 
     /**
      * Método que calcula el mejor cromosoma de la población
@@ -605,6 +611,16 @@ public class Poblacion {
     private static void debugMutacion(String accion) {
         if (DEBUG_MUTAR) System.out.println(accion);
     }
+
+    /**
+     * Método para sacar por pantalla las acciones de la mutacion de la población
+     *
+     * @param accion
+     */
+    private static void debugTiempo(String accion) {
+        if (DEBUG_TIEMPO) System.out.println(accion);
+    }
+
 
     /**
      * Método para mostrar por pantalla los genes de cada cromosoma de una forma clara
