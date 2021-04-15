@@ -16,7 +16,7 @@ public class Poblacion {
      * <p>
      * NECESARIO QUE SEA 6 Ó MÁS CROMOSOMAS PARA UN CORRECTO FUNCIONAMIENTO DE LA SELECCIÓN POR TORNEO
      */
-    private static final int CANTIDAD_CROMOSOMAS = 6;
+    private static final int CANTIDAD_CROMOSOMAS = 20;
 
     /**
      * Variable que indica desde donde cortar en el cromosoma, por defecto se inicia en 2

@@ -14,7 +14,7 @@ public class Poblacion {
     /**
      * Cantidad de cromosomas dentro de la población
      */
-    private static final int CANTIDAD_CROMOSOMAS = 6;
+    private static final int CANTIDAD_CROMOSOMAS = 20;
 
     /**
      * Cantidad de generaciones que se van a repetir
@@ -55,7 +55,7 @@ public class Poblacion {
      * Si está false, se considerará el número máximo de generaciones como condición de parada
      * Si está true, se considerará el método condición de parada junto a la variable generaciónMejora (parará si no mejora en x generaciones)
      */
-    private static final boolean CONDICION_PARADA = true;
+    private static final boolean CONDICION_PARADA = false;
 
     /**
      * Cantidad de generaciones que tiene que ser mejor la última de ellas para continuar iterando.
@@ -136,7 +136,7 @@ public class Poblacion {
     /**
      * Mostrar por pantalla el tiempo que tarda en ejecutar el programa
      */
-    private static final boolean DEBUG_TIEMPO = false;
+    private static final boolean DEBUG_TIEMPO = true;
 
     //VARIABLES QUE NO SE PUEDEN MODIFICAR
     private Cromosoma[] cromosomas = new Cromosoma[this.CANTIDAD_CROMOSOMAS];
