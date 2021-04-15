@@ -1,4 +1,4 @@
-package OchoCeldas;
+package nueveCeldas;
 
 import excepciones.AlgoritmoGeneticoExcepcion;
 

@@ -1,4 +1,4 @@
-package OchoCeldas;
+package nueveCeldas;
 
 public class Cromosoma implements Comparable<Cromosoma>{
 
@@ -75,6 +75,12 @@ public class Cromosoma implements Comparable<Cromosoma>{
         return this.cantidadGenes;
     }
 
+    /**
+     * Método auxiliar para comprobar si dos cromosomas son iguales, comparando los genes
+     *
+     * @param cromosoma
+     * @return
+     */
     public boolean esMismoCromosoma(Cromosoma cromosoma){
         int contador=0;
         for (int i=0; i<cantidadGenes;i++){
